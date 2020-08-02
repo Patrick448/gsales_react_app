@@ -1,3 +1,22 @@
+*{
+  padding: 0;
+  margin: 0;
+}
+
+.app {
+
+  display: flex;
+  flex-flow: column;
+  border: 50px;
+
+}
+.nav{
+  flex: 0 1 auto;
+}
+.page-content{
+  flex: 1 1 auto;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',

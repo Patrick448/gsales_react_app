@@ -1,0 +1,55 @@
+nav{
+    display: flex;
+    padding: 10px 0px 10px 0px;
+    background-color:#00d157;
+    justify-content: space-between;
+}
+
+.nav-left{
+    display: flex;
+}
+
+
+.nav-right{
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.nav-right p{
+    color: white;
+}
+
+
+nav h1{
+    margin-left: 15px;
+    color: white;
+}
+
+nav button{
+    font-size: medium;
+    color: white;
+    border-radius: 5%;
+    border: none;
+    outline: none;
+    padding: 5px;
+    margin-left: 15px;
+    background-color: transparent;
+    transition: ease-in-out 0.2s;
+}
+
+nav button:hover{
+    background-color: #ffffff57;
+    transition: ease-in-out 0.3s;
+    
+
+}
+
+
+@media(max-width: 800px){
+
+    nav button{
+        display: none;
+    }
+
+}
