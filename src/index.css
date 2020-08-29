@@ -3,18 +3,113 @@
   margin: 0;
 }
 
-.app {
+.app{
+  height: 100vh;
+}
 
+.login-page{
   display: flex;
-  flex-flow: column;
-  border: 50px;
+  height: 100%;
+}
+
+.login-box{
+  margin: auto;
+  background-color: gray;
+  padding: 10px;
+  text-align: center;
+  min-width: 35%;
+  background-color:#00d157;
+  border-radius: 10px;
+  
+}
+
+.login-box h1{
+  color: white;
+  padding-bottom: 10px;
+}
+
+.login-box input{
+  outline: none;
+}
+
+.login-box .form-input{
+  border-radius: 5px;
+  border: none;
+  padding: 7.5px;
+  font-size: 15px;
+  
+}
+
+.login-box .form-input:focus{
+  box-shadow: rgba(255, 255, 255, 0.356) 0 0 0 5px;
+  transition: 0.2s;
 
 }
-.nav{
-  flex: 0 1 auto;
+
+.login-box input[type="submit"]{
+  padding: 5px;
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  border: 3px solid white;
+  background-color:#00d157;
+  transition: 0.3s;
+
 }
-.page-content{
-  flex: 1 1 auto;
+
+.login-box input[type="submit"]:hover{
+  background-color: rgba(255, 255, 255, 0.295);
+  transition: 0.3s;
+}
+
+.login-form-container form{
+  display: flex;
+  flex-direction: column;
+
+}
+
+.login-form-container form input{
+  margin: 10px;
+}
+
+.login-failed-warning{
+  align-self: center;
+  color: red;
+  background-color: rgba(255, 255, 255, 0.61);
+  border-radius: 5px;
+  padding: 2px;
+  width: fit-content;
+}
+
+.new-orders-page-container{
+  display: flex;
+}
+
+.available-products-container{
+  display: flex;
+  margin: auto;
+}
+
+.available-filter-box{
+  
+  display: flex;
+  flex-direction: column;
+  width: 20vw;
+  border-radius: 5px;
+  background-color:rgba(128, 128, 128, 0.384);
+  margin: 10px;
+}
+
+.available-filter-box input{
+  margin: 15px;
+  height: 35px;
+}
+
+.cart-footer{
+  display: flex;
+  justify-content: space-between;
+  padding: 10px
 }
 
 body {
@@ -30,3 +125,4 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+

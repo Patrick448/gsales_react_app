@@ -1,6 +1,5 @@
 .modal{
     position: fixed;
-    display: none;
     top: 0;
     left: 0;
     z-index: 1;
@@ -45,12 +44,18 @@
     outline: none;
     padding: 5px;
     background-color: rgba(189, 189, 189, 0.582);
-    transition: ease-in-out 0.2s;
-    transition: box-shadow ease-in-out 0.2s;
+    transition:  ease-in-out 0.2s;
+    transition: box-shadow background-color ease-in-out 0.2s;
 }
 
 .modal-footer button:hover{
-    box-shadow: rgba(211, 210, 210, 0.671) 0px 0px 0px 3px;
+    box-shadow: rgba(122, 122, 122, 0.671) 0px 0px 0px 3px;
+
+}
+
+.modal-footer button:active{
+    transition: ease-in-out 0.1s;
+    background-color: rgba(122, 122, 122, 0.671);
 
 }
 
@@ -65,7 +70,7 @@
 .close-span{
     color: gray;
     font-size: 30px;
-    cursor: default;
+    cursor: pointer;
 }
 
 .close-span:hover{
@@ -73,7 +78,7 @@
     }
 
 .modal-footer{
-    padding: 5px 10px 0px 10px;
+    padding: 10px 10px 0px 10px;
     margin-bottom: 5px;
     border-top:1px solid gray;
  
@@ -94,6 +99,14 @@
     width: 100%;
 }
 
+.show{
+    display: block;
+}
+
+.hide{
+    display: none;
+}
+
 @keyframes popup{
     from {transform: scale(0.95); 
         opacity: 0;
@@ -103,7 +116,15 @@
         }
 }
 
-
+@keyframes popup-reverse{
+    from {
+        opacity: 1;
+        }
+    to {transform: scale(0.95); 
+        opacity: 0;
+        }
+   
+}
 
 @keyframes animate-modal{
     from{opacity: 0;}

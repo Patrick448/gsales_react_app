@@ -3,6 +3,8 @@ import TableRow from './table-row'
 import './index.css'
 
 function Table(props){
+
+    
     return(
         <table>
             <thead>
@@ -14,7 +16,8 @@ function Table(props){
             <tbody>
                 {props.contents.map( item =>  <TableRow rowContent={item} 
                                                         keyOrder={Object.values(props.titles)} 
-                                                        actions={props.actions}/>)}
+                                                        actions={props.actions}
+                                                        preDisplay={props.preDisplay }/>)}
             </tbody>
         </table>
 

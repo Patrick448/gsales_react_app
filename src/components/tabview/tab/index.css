@@ -1,0 +1,21 @@
+.tab{
+    
+    border-radius: 5px 5px 0 0;
+    padding: 10px;
+    margin-right: 2px;
+    margin-left: 2px;
+    cursor: pointer;
+    border-top: 1px transparent white ;
+    border-left: 1px transparent white ;
+    border-right: 1px transparent white ;
+    transition: ease-in-out 0.2s;
+}
+
+.tab.active{
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.315) 0px 0px 5px 1px;
+    transition: ease-in-out 0.2s;
+
+   
+
+}

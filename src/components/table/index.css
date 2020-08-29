@@ -26,7 +26,7 @@ td{
 }
 
 
-td button{
+td input[type="button"]{
     visibility: hidden;
     border-radius: 5%;
     border: none;
@@ -37,8 +37,14 @@ td button{
     transition: box-shadow ease-in-out 0.2s;
 }
 
-td button:hover{
-    box-shadow: rgba(211, 210, 210, 0.671) 0px 0px 0px 3px;
+td input[type="button"]:hover{
+    box-shadow: rgba(122, 122, 122, 0.671) 0px 0px 0px 3px;
+
+}
+
+td input[type="button"]:active{
+    transition: ease-in-out 0.1s;
+    background-color: rgba(122, 122, 122, 0.671);
 
 }
 
@@ -50,7 +56,7 @@ tbody tr:hover{
     background-color: rgba(223, 223, 223, 0.562);
 }
 
-tbody tr:hover> td button{
+tbody tr:hover> td input{
     visibility: visible;
  
 }
