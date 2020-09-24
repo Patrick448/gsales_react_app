@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {BrowserRouter as Router, Route, Link, Switch, Redirect} from 'react-router-dom'
-import './App.css';
+import './App.css'
 import Navbar from './components/navbar'
 import Table from './components/table'
 import Modal from './components/modal'
-import Tab from './components/tabview/tab';
-import TabRow from './components/tabview/tabrow';
-import TabContent from './components/tabview/tabcontent';
-import formatMoney from './utils/util'
+import Tab from './components/tabview/tab'
+import TabRow from './components/tabview/tabrow'
+import TabContent from './components/tabview/tabcontent'
+import {formatMoney, formattedDate} from './utils/util'
+import FilterBox from './components/filter_box'
+import Protected from './components/protected'
 
 
 
 class App extends React.Component{
+
 
   constructor(props) {
     super(props);    
@@ -23,24 +26,35 @@ class App extends React.Component{
     return  (<div className="app" class="app">
               <Router>
                 <Switch>
-                <Route exact={true} path='/login' component={LoginPage}/>
+                  <Route exact={true} path='/login' component={LoginPage}/>
 
-                <Route exact={true} path='/register' component={SignUpPage}/>
+                  <Route exact={true} path='/register' component={SignUpPage}/>
 
-                 <Navbar title="GreenSales">
-                   
-                    <a href="/novo">Novo Pedido</a>
-                    <a href="/admin">Histórico</a>
-                    <a href="/novo">Sobre</a>
-                  </Navbar>
+                  <div>
+                  <Protected>
+                    <Navbar title="GreenSales">
+                      <a href="/novo">Novo Pedido</a>
+                      <a href="/meus-pedidos">Meus Pedidos</a>
+                      <a href="/admin">Painel</a>
+                      <a href="/novo">Sobre</a>
+                      
+                    </Navbar> 
+                    
+                      <Route exact={true} path='/admin' component={AdminPanel}/>
+                    
+                      <Route exact={true} path='/novo' component={NewOrderPage}/>
+
+                      <Route exact={true} path='/meus-pedidos' component={OrdersPage}/>
+
+                      <Route exact={true} path='/t' render={()=>
+                        <h1>Test Route 2</h1>
+                        
+                      }/>
+                    </Protected>
+                    </div>
                 </Switch>
-                  <Route exact={true} path='/admin' component={AdminPanel}/>
 
-                  <Route exact={true} path='/novo' component={NewOrderPage}/>
-
-                  <Route exact={true} path='/t' render={()=>
-                    <h1>Test Route 2</h1>
-                  }/>
+               
                
               </Router>
             </div>)
@@ -115,11 +129,11 @@ function SignUpPage(props){
       method: 'POST',
       body: data,
     }).then(response =>{
-      if(response.status == 401){
+      if(response.status === 401){
         setRegisterFailed
     (true);
         
-      }else if (response.status==200){
+      }else if (response.status===200){
         window.location.replace("/login")
       }
       return response.text()
@@ -153,13 +167,15 @@ function SignUpPage(props){
   )
 }
 
-class AdminPanel extends React.Component {
+
+class AdminPanel extends React.Component { 
+
 
   constructor(props){
     super(props)
     this.state = {showModal: false,
       titles : {"Número":"id", "Produto":"name", "Preço":"price"},
-      ordersTodayTitles : {"Número":"id", "Cliente":"name", "Total":"total"},
+      ordersTodayTitles : {"Número":"id", "Cliente":"user_name", "Total":"total"},
       activeTab: "t1",
       actions : [{type: "button", value: "Adicionar", action: this.b.bind(this)}],
       pricesActions: [{type: "checkbox", value: "",  action: this.checkboxClick.bind(this)}],
@@ -175,17 +191,40 @@ class AdminPanel extends React.Component {
                   {"id": "3", "price":"80", "name":"Alface"},
                   {"id": "4", "price":"80", "name":"Chuchu"},
                   {"id": "5", "price":"80", "name":"Beteraba"},
-                  {"id": "6", "price":"80", "name":"Maçã"}]
+                  {"id": "6", "price":"80", "name":"Maçã"}],
+      availableList: [],
+      allProducts: [],
+      modalContent: [],
+      historyFilteredOrders: [],
+      modalFooter: [],
+      modalHeader: [],
+      postSaveStatus: "",
       }
   }
 
   componentDidMount(){
+    this.fetchAvailableList()
+    this.fetchTodaysOrders()
+    this.fetchAllProducts()
+  }
+
+  fetchAvailableList(){
     fetch('/pedido/get-list')
     .then(response => {return response.json()})
     .then(data =>this.setState({ contents: Object.values(data) }));
   }
 
-  
+  fetchTodaysOrders(){
+    fetch('/admin_get_orders_today')
+    .then(response => {return response.json()})
+    .then(data => { this.setState({ordersToday: data})})
+  }
+
+  fetchAllProducts(){
+    fetch('/get-all-products-full')
+    .then(response => {return response.json()})
+    .then(data => { this.setState({allProducts: data}) } )
+  }
 
   closeModal(){
     this.setState({showModal: false});
@@ -195,28 +234,112 @@ class AdminPanel extends React.Component {
     this.setState({activeTab: tab})
   }
 
-  checkboxClick(e){
-    console.log(e)
+  checkboxClick(e, product){
+
+    this.setState({postSaveStatus: ""})
+
+    if(e.target.checked){
+      product.price = prompt("Digite o preço")
+
+    }
+    else{
+      product.price = null
+    }
+
+    this.forceUpdate()
+    console.log(e.target.checked)
+  }
+
+  postPrices(list){
+
+    let filteredList = list.filter(item => {return item.price})
+    let pricesList = filteredList.map(item => { return {id: item.id, price: item.price} })
+    let post_data = {items: pricesList}
+
+    fetch('/set-available', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'},  
+      method: 'POST',
+      body: JSON.stringify(post_data),
+    }).then(response => {
+      if(response.status === 201){
+        this.setState({postSaveStatus: "Preços salvos"})
+      } 
+      });
+
+
   }
 
   b(y, x){
     this.setState({showModal : this.state.showModal ? false : true});
-    alert("Clicked " + x.name)
+    this.setState({modalContent: x.items})
+    this.setState({modalFooter: x.total})
+    //alert("Clicked " + x.name)
     console.log(y)
     console.log(x)
     
+
+  }
+
+
+
+  orderDetailsToModal(e, order){
+    
+    this.setState({modalContent: order.items, 
+                  modalHeader: order.user_name + " | " + formattedDate(order.timeStamp), 
+                  modalFooter: order.total, 
+                  showModal : this.state.showModal ? false : true});
+
+  } 
+
+
+  historyFilter(event){ 
+    event.preventDefault();
+    const data = new FormData(event.target);
+
+    console.log(event.target.time_from.valueAsNumber)
+
+    const dayInMillis = 86400000;
+    let timeFrom= event.target.time_from.valueAsNumber
+    let timeTo=event.target.time_to.valueAsNumber + dayInMillis
+    let customerName = event.target.name.value
+    let orderNum = event.target.num.value
+   
+
+    fetch(`/admin_get_orders/filter/?time_from=${timeFrom}&time_to=${timeTo}&name=${customerName}&num=${orderNum}`)
+    .then(response => {return response.json()})
+    .then(data => {this.setState({historyFilteredOrders: data})})
+  
+  }
+
+  historyTableRowFormat(row){
+    let newRow = {...row}
+    newRow.total = formatMoney(newRow.total)
+    newRow.timeStamp = formattedDate(newRow.timeStamp)
+
+    return newRow
+
   }
 
   render(){
+
+    const historyTitles = {"Número":"id", "Data":"timeStamp", "Cliente":"user_name", "Total":"total"}
+    const historyActions = [{type: "button", value: "Ver", action: this.orderDetailsToModal.bind(this)}]
+    const modalTableTitles = {"Número":"id", "Produto":"name","Quantidade":"quant", "Unidade":"unit", "Preço":"price", "Subtotal":"total"}
+    const ordersTodayActions = [{type: "button", value: "Verificar", action: this.orderDetailsToModal.bind(this)}]
+    const ordersTodayTitles = {"Número":"id", "Cliente":"user_name", "Total":"total"}
+    const pricesActions = [{type: "checkbox", value: "",  action: this.checkboxClick.bind(this)}]
+
     return(
       <div>
       <Modal showModal={this.state.showModal} 
             closeEvent={this.closeModal.bind(this)}
-            title="Pedido"
-            footerText="Valor"
+            title={this.state.modalHeader}
+            footerText={"R$ " + formatMoney(this.state.modalFooter)}
             buttonText="Confirmar">
       
-        <Table titles={this.state.titles} contents={this.state.contents}/>
+        <Table titles={modalTableTitles} contents={this.state.modalContent}/>
       </Modal>
   
       <TabRow>
@@ -228,22 +351,155 @@ class AdminPanel extends React.Component {
   
       <TabContent tab="t1" activeTab={this.state.activeTab}>
         <div className="page_content">
-          <Table titles={this.state.ordersTodayTitles} contents={this.state.ordersToday} actions={this.state.actions}/>
+          <Table titles={ordersTodayTitles} contents={this.state.ordersToday} actions={ordersTodayActions}/>
         </div>
       </TabContent>
   
       <TabContent tab="t2" activeTab={this.state.activeTab}>
-        Aloo tab 2
+      <div className="page_content">
+          <FilterBox>
+            <div className="history-filter-container">
+              <form onSubmit={(event) => this.historyFilter(event)}>
+                <label for="time_from">De</label>
+                <input className="filter date-input" type="date" name="time_from"/>
+
+                <label for="time_to">a</label>
+                <input className="filter date-input" type="date" name="time_to"/>
+
+                <label for="name">Nome</label>
+                <input className="filter text-input" type="text" name="name"/>
+
+                <label for="num">Pedido</label>
+                <input className="filter text-input" type="text" name="num"/>
+
+                <input className="filter button" type="submit" value="Filtrar"/>
+              </form>
+            </div>
+          </FilterBox>
+          <Table titles={historyTitles} contents={this.state.historyFilteredOrders} actions={historyActions} preDisplay={this.historyTableRowFormat}/>
+      </div>
       </TabContent>
   
       <TabContent tab="t3" activeTab={this.state.activeTab}>
-        <Table titles={this.state.titles} contents={this.state.contents} actions={this.state.pricesActions}/>
+        <Table titles={this.state.titles} contents={this.state.allProducts} actions={pricesActions}/>
+        <button onClick={() => this.postPrices(this.state.allProducts)}>Salvar Preços</button>
+        <span>{this.state.postSaveStatus}</span>
       </TabContent>
     </div>
   
     )
   }
+} 
+
+class OrdersPage extends React.Component{
+
+  constructor(props){
+    super(props)
+    this.state = { 
+      showModal: false,
+      modalContent: [],
+      myOrdersFilteredOrders: [],
+      modalFooter: [],
+      modalHeader: []
+    }
+  }
+
+ 
+
+  closeModal(){
+    this.setState({showModal: false});
+  }
+
+  orderDetailsToModal(e, order){
+    
+    this.setState({modalContent: order.items, 
+                  modalHeader: formattedDate(order.timeStamp), 
+                  modalFooter: order.total, 
+                  showModal : this.state.showModal ? false : true});
+
+  }
+
+  myOrdersFilter(event){
+    event.preventDefault();
+    const data = new FormData(event.target);
+
+    console.log(event.target.time_from.valueAsNumber)
+
+    const dayInMillis = 86400000;
+    let timeFrom= event.target.time_from.valueAsNumber
+    let timeTo=event.target.time_to.valueAsNumber + dayInMillis
+    let orderNum = event.target.num.value
+   
+
+    fetch(`/get_orders/by_date/${timeFrom}+${timeTo}`)
+    .then(response => {return response.json()})
+    .then(data => {this.setState({myOrdersFilteredOrders: data})})
+  
+  }
+
+  myOrdersTableRowFormat(row){
+    let newRow = {...row}
+    newRow.total = formatMoney(newRow.total)
+    newRow.timeStamp = formattedDate(newRow.timeStamp)
+
+    return newRow
+
+  }
+
+  modalOrderTableRowFormat(row){
+    let newRow = {...row}
+    newRow.price = formatMoney(newRow.price)
+    newRow.total = formatMoney(newRow.total)
+
+
+    return newRow
+  }
+
+  render(){
+
+    const myOrdersTitles = {"Número":"id", "Data":"timeStamp", "Total":"total"}
+    const myOrdersActions = [{type: "button", value: "Ver", action: this.orderDetailsToModal.bind(this)}]
+    const modalTableTitles = {"Número":"id", "Produto":"name","Quantidade":"quant", "Unidade":"unit", "Preço":"price", "Subtotal":"total"}
+
+    return(
+      <div>
+      <Modal showModal={this.state.showModal} 
+            closeEvent={this.closeModal.bind(this)}
+            title={this.state.modalHeader}
+            footerText={"R$ " + formatMoney(this.state.modalFooter)}
+            buttonText="Ok">
+      
+        <Table titles={modalTableTitles} contents={this.state.modalContent} preDisplay={this.modalOrderTableRowFormat}/>
+
+      </Modal>
+  
+  
+      <div className="page_content">
+          <FilterBox>
+            <div className="history-filter-container">
+              <form onSubmit={(event) => this.myOrdersFilter(event)}>
+                <label for="time_from">De</label>
+                <input className="filter date-input" type="date" name="time_from"/>
+
+                <label for="time_to">a</label>
+                <input className="filter date-input" type="date" name="time_to"/>
+
+                <label for="num">Pedido</label>
+                <input className="filter text-input" type="text" name="num"/>
+
+                <input className="filter button" type="submit" value="Filtrar"/>
+              </form>
+            </div>
+          </FilterBox>
+          <Table titles={myOrdersTitles} contents={this.state.myOrdersFilteredOrders} actions={myOrdersActions} preDisplay={this.myOrdersTableRowFormat}/>
+      </div>
+      
+    </div>
+  
+    )
+  }
 }
+
 
 class NewOrderPage extends React.Component {
 
@@ -254,7 +510,10 @@ class NewOrderPage extends React.Component {
                   cartTitles: {"Número":"id", "Produto":"name", "Unidade":"unit", "Preço":"price", "Quantidade":"quant", "Subtotal":"total"},
                   cartActions: [{type: "button", value: "Remover", action: this.removeFromCart.bind(this)}],
                   tableCart: [],
-                  tableContent: []
+                  tableContent: [],
+                  modalContent: [],
+                  modalFooter: [],
+                  modalHeader: []
 
     }
   }
@@ -306,7 +565,7 @@ class NewOrderPage extends React.Component {
         'Content-Type': 'application/json'},  
       method: 'POST',
       body: JSON.stringify(post_data),
-    }).then(response => alert(JSON.stringify(response)));
+    }).then(response => {alert(JSON.stringify(response)); window.location.replace("/meus-pedidos")});
     
   }
 
@@ -327,12 +586,37 @@ class NewOrderPage extends React.Component {
     return newRow
   }
 
+  orderDetailsToModal(e, order){
+    
+    this.setState({modalContent: order.items, 
+                  modalHeader: order.user_name + " | " + formattedDate(order.timeStamp), 
+                  modalFooter: order.total, 
+                  showModal : this.state.showModal ? false : true});
+
+  }
+
+  closeModal(){
+    this.setState({showModal: false});
+  }
+
   render(){
 
     let totalValue = this.state.tableCart.reduce(this.cartReducer, 0)
+    const modalTableTitles = {"Número":"id", "Produto":"name","Quantidade":"quant", "Unidade":"unit", "Preço":"price", "Subtotal":"total"}
+
     
     return(
     <div className="new-orders-page-container">
+       <Modal showModal={this.state.showModal} 
+            closeEvent={this.closeModal.bind(this)}
+            title="Confirmar pedido"
+            footerText={"R$ " + totalValue}
+            buttonText="Confirmar"
+            buttonAction={() => this.postOrder(this.state.tableCart)}>
+      
+        <Table titles={modalTableTitles} contents={this.state.tableCart}/>
+      </Modal>
+
       <div className="available-products-container">
         <div className="available-filter-box">
           <input type="text"/>
@@ -365,11 +649,11 @@ class NewOrderPage extends React.Component {
 
           <div className="cart-footer">
             <p>R$ {formatMoney(totalValue)}</p>
-            <button onClick={() => this.postOrder(this.state.tableCart)}>Concluir</button>
+            <button onClick={(e) => this.orderDetailsToModal(e, this.state.tableCart)}>Concluir</button>
           </div>
         </div>
       </div>
     </div> 
   )
     }
-}
+} 

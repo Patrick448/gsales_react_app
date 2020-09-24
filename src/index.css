@@ -121,6 +121,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.history-filter-container{
+  padding: 10px;
+}
+
+.history-filter-container input{
+  margin-right: 10px;
+  margin-left: 5px;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

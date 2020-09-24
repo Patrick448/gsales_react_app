@@ -81,4 +81,4 @@
     }
 
 
-export default formatMoney
+export  {formattedDate, formatMoney}
