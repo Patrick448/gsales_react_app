@@ -198,6 +198,7 @@ class AdminPanel extends React.Component {
       historyFilteredOrders: [],
       modalFooter: [],
       modalHeader: [],
+      modalAction: "",
       postSaveStatus: "",
       }
   }
@@ -224,6 +225,20 @@ class AdminPanel extends React.Component {
     fetch('/get-all-products-full')
     .then(response => {return response.json()})
     .then(data => { this.setState({allProducts: data}) } )
+  }
+
+  postChangeOrderStatus(order){
+
+    let post_data = {'order_id': order.id}
+
+    fetch('/set-order-status-verified', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'},  
+      method: 'POST',
+      body: JSON.stringify(post_data),
+    }).then(response => {alert(JSON.stringify(response)); this.fetchTodaysOrders()});
+    
   }
 
   closeModal(){
@@ -291,6 +306,16 @@ class AdminPanel extends React.Component {
                   modalFooter: order.total, 
                   showModal : this.state.showModal ? false : true});
 
+  }
+
+verifyOrderDetailsModal(e, order){
+    
+    this.setState({modalContent: order.items, 
+                  modalHeader: order.user_name + " | " + formattedDate(order.timeStamp), 
+                  modalFooter: order.total, 
+                  showModal : this.state.showModal ? false : true,
+                  modalAction: () => this.postChangeOrderStatus(order)});
+
   } 
 
 
@@ -327,8 +352,8 @@ class AdminPanel extends React.Component {
     const historyTitles = {"Número":"id", "Data":"timeStamp", "Cliente":"user_name", "Total":"total"}
     const historyActions = [{type: "button", value: "Ver", action: this.orderDetailsToModal.bind(this)}]
     const modalTableTitles = {"Número":"id", "Produto":"name","Quantidade":"quant", "Unidade":"unit", "Preço":"price", "Subtotal":"total"}
-    const ordersTodayActions = [{type: "button", value: "Verificar", action: this.orderDetailsToModal.bind(this)}]
-    const ordersTodayTitles = {"Número":"id", "Cliente":"user_name", "Total":"total"}
+    const ordersTodayActions = [{type: "button", value: "Verificar", action: this.verifyOrderDetailsModal.bind(this)}]
+    const ordersTodayTitles = {"Número":"id", "Cliente":"user_name", "Total":"total", "Verificado":"status"}
     const pricesActions = [{type: "checkbox", value: "",  action: this.checkboxClick.bind(this)}]
 
     return(
@@ -337,7 +362,8 @@ class AdminPanel extends React.Component {
             closeEvent={this.closeModal.bind(this)}
             title={this.state.modalHeader}
             footerText={"R$ " + formatMoney(this.state.modalFooter)}
-            buttonText="Confirmar">
+            buttonText="Confirmar"
+            buttonAction={this.state.modalAction}>
       
         <Table titles={modalTableTitles} contents={this.state.modalContent}/>
       </Modal>
